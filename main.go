@@ -2,52 +2,54 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-func defaultHandler(w http.ResponseWriter, r *http.Request) {
+func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	var err error = nil
-	if r.URL.Path == "/" {
-		_, err = fmt.Fprintf(w, "<h1>Hello，这里是 goblog</h1>")
-	} else {
-		w.WriteHeader(http.StatusNotFound)
-		_, err = fmt.Fprintf(w, "<h1>请求页面未找到 :(</h1>"+"<p>如有疑惑，请联系我</p>")
-	}
-	if err != nil {
-		log.Println(err)
-	}
+	_, _ = fmt.Fprint(w, "<h1>Hello, Welcome to goblog</h1>")
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, err := fmt.Fprintf(w, "此博客为个人练手项目，如有反馈和建议，请联系\n"+"<a href=\"mailto:devil2gamma@gmail.com\">devil2gamma@gmail.com</a>")
-	if err != nil {
-		log.Println(err)
-	}
+	_, _ = fmt.Fprint(w, "此博客为Demo，如有问题请联系"+"<a href=\"mailto:devil2gamma@gmail.com\">devil2gamma@gmail.com</a>")
+}
+
+func notFountHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = fmt.Fprint(w, "<h1>请求页面未找到</h1><p>如有疑问，请联系我。</p>")
+}
+
+func articlesShowHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	fmt.Fprint(w, "文章 ID："+id)
+}
+
+func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "访问文章列表")
+}
+
+func articlesStorageHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "创建新的文章")
 }
 
 func main() {
-	router := http.NewServeMux()
+	router := mux.NewRouter()
 
-	router.HandleFunc("/", defaultHandler)
-	router.HandleFunc("/about", aboutHandler)
+	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
+	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
+	router.HandleFunc("/articles/{id:[0-9]+}", articlesShowHandler).Methods("GET").Name("articles.show")
+	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
+	router.HandleFunc("/articles", articlesStorageHandler).Methods("POST").Name("articles.store")
+	router.NotFoundHandler = http.HandlerFunc(notFountHandler)
 
-	router.HandleFunc("/articles/", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			_, _ = fmt.Fprintf(w, "访问文章列表")
-		case "POST":
-			_, _ = fmt.Fprint(w, "创建新的文章")
-		}
-		id := strings.SplitN(r.URL.Path, "/", 3)[2]
-		_, _ = fmt.Fprintf(w, "文章 ID："+id)
-	})
+	homeURL, _ := router.Get("home").URL()
+	fmt.Println("homeURL: ", homeURL)
+	articlaURL, _ := router.Get("articles.show").URL("id", "23")
+	fmt.Println("articleURL: ", articlaURL)
 
-	err := http.ListenAndServe(":8080", router)
-	if err != nil {
-		return
-	}
+	http.ListenAndServe(":8080", router)
 }
