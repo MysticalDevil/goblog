@@ -10,21 +10,23 @@ import (
 )
 
 // Render 渲染视图
-func Render(w io.Writer, name string, data any) {
+func Render(w io.Writer, data any, tplFile ...string) {
 	viewDir := "resources/views/"
 
-	// 语法糖 将 articles.show 更正为 articles/show
-	name = strings.Replace(name, ".", "/", -1)
+	// 遍历传参文件列表 Slice，设置正确路径，支持 dir.filename 语法他
+	for i, f := range tplFile {
+		tplFile[i] = viewDir + strings.Replace(f,".", "/", -1) + ".gohtml"
+	}
 
-	files, err := filepath.Glob(viewDir + "layouts/*.gohtml")
+	layoutFiles, err := filepath.Glob(viewDir + "layouts/*.gohtml")
 	logger.LogError(err)
 
-	newFiles := append(files,viewDir+name+".gohtml")
+	allFiles := append(layoutFiles,tplFile...)
 
-	tmpl, err := template.New(name+".gohtml").
+	tmpl, err := template.New("").
 		Funcs(template.FuncMap{
 			"RouteName2URL": route.Name2URL,
-	}).ParseFiles(newFiles...)
+	}).ParseFiles(allFiles...)
 	logger.LogError(err)
 
 	err = tmpl.ExecuteTemplate(w, "app", data)
