@@ -26,18 +26,18 @@ func initDB() {
 	}
 
 	// 准备数据库连接池
-	db, err = sql.Open("mysql", config.FormatDSN())
+	DB, err = sql.Open("mysql", config.FormatDSN())
 	logger.LogError(err)
 
 	// 设置最大连接数
-	db.SetMaxOpenConns(25)
+	DB.SetMaxOpenConns(25)
 	// 设置最大空闲连接数
-	db.SetMaxIdleConns(25)
+	DB.SetMaxIdleConns(25)
 	// 设置每个连接的过期时间
-	db.SetConnMaxIdleTime(time.Minute * 5)
+	DB.SetConnMaxIdleTime(time.Minute * 5)
 
 	// 尝试连接
-	err = db.Ping()
+	err = DB.Ping()
 	logger.LogError(err)
 }
 
@@ -48,6 +48,6 @@ func createTables() {
     body LONGTEXT COLLATE utf8mb4_unicode_ci
     );`
 
-	_, err := db.Exec(createArticlesSQL)
+	_, err := DB.Exec(createArticlesSQL)
 	logger.LogError(err)
 }
