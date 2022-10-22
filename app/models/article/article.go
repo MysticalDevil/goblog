@@ -11,6 +11,6 @@ type Article struct {
 	Body  string
 }
 
-func (article Article) Link() string {
+func (article *Article) Link() string {
 	return route.Name2URL("articles.show", "id", strconv.FormatUint(article.ID, 10))
 }
