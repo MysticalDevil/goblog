@@ -9,7 +9,7 @@ import (
 
 const baseURL = "http://localhost:8080"
 
-func TestAllpages(t *testing.T) {
+func TestAllPages(t *testing.T) {
 	var tests = []struct {
 		method   string
 		url      string
