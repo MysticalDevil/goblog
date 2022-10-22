@@ -1,48 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <title>所有文章 -- GoBlog</title>
-  <link rel="stylesheet" href="/css/bootstrap.css">
-</head>
-<body>
-<div class="container-sm">
-  <div class="row mt-5">
+{{define "title"}}
+所有文章 -- GoBlog
+{{end}}
 
-    <div class="col-md-3 blog-sidebar">
-      <div class="p-4 mb-3 bg-white rounded shadow-sm">
-        <h1>GoBlog</h1>
-        <p class="mb-0">😀</p>
-      </div>
-
-      <div class="p-4 bg-white-rounded shadow-sm mb-3">
-        <h5>分类</h5>
-        <ol class="list-unstyled mb-0">
-          <li><a href="#">未分类</a></li>
-          <li><a href="#">模板</a></li>
-          <li><a href="#">数据库</a></li>
-        </ol>
-      </div>
-
-      <div class="p-4 bg-white rounded shadow-sm mb-3">
-        <h5>作者</h5>
-        <ol class="list-unstyled mb-0">
-          <li><a href="#">Alpha</a></li>
-          <li><a href="#">Beta</a></li>
-          <li><a href="#">Gamma</a></li>
-        </ol>
-      </div>
-
-      <div class="p-4 bg-white rounded shadow-sm mb-3">
-        <h5>链接</h5>
-        <ol class="list-unstyled mb-0">
-          <li><a href="#">关于我们</a></li>
-          <li><a href="#">注册</a></li>
-          <li><a href="#">登录</a></li>
-        </ol>
-      </div>
-    </div>
-    <!-- /.blog-sidebar -->
-
+{{define "main"}}
     <div class="col-md-9 blog-main">
         {{range $key, $article := .}}
           <div class="blog-post bg-white p-5 rounded shadow mb-4">
@@ -65,11 +25,4 @@
         <a href="#" class="btn btn-outline-secondary disabled" tabindex="-1" aria-disabled="true">上一页</a>
       </nav>
     </div>
-    <!-- /.blog-main -->
-
-  </div>
-</div>
-
-<script src="/js/bootstrap.js"></script>
-</body>
-</html>
+{{end}}

@@ -9,9 +9,12 @@ import (
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
+
+const viewDir = "resources/views"
 
 // ArticlesController 文章相关页面
 type ArticlesController struct {
@@ -62,10 +65,17 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		// 所有布局模板文件 Slice
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
 
-		err = tmpl.Execute(w, articles)
+		// 在 Slice 里新增目标文件
+		newFiles := append(files, viewDir+"/articles/index.gohtml")
+
+		tmpl, err := template.ParseFiles(newFiles...)
+		logger.LogError(err)
+
+		err = tmpl.ExecuteTemplate(w,"app", articles)
 		logger.LogError(err)
 	}
 }
