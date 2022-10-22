@@ -366,8 +366,9 @@ func getRouteVariable(parameterName string, r *http.Request) string {
 
 func main() {
 	database.Initialize()
-	db = bootstrap.SetupDB()
+	db = database.DB
 
+	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
