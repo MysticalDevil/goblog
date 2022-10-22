@@ -5,16 +5,14 @@ import (
 	"goblog/app/models/article"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
-	"goblog/pkg/types"
+	"goblog/pkg/view"
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
 
-const viewDir = "resources/views"
 
 // ArticlesController 文章相关页面
 type ArticlesController struct {
@@ -44,21 +42,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
-		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
-		logger.LogError(err)
-
-		newFiles := append(files, viewDir+"/articles/show.gohtml")
-
-		tmpl, err := template.New("show.gohtml").
-			Funcs(template.FuncMap{
-				"RouteName2URL":  route.Name2URL,
-				"Uint64ToString": types.Uint64ToString,
-			}).
-			ParseFiles(newFiles...)
-		logger.LogError(err)
-
-		err = tmpl.ExecuteTemplate(w, "app", _article)
-		logger.LogError(err)
+		view.Render(w, "articles.show", _article)
 	}
 }
 
@@ -70,18 +54,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		// 所有布局模板文件 Slice
-		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
-		logger.LogError(err)
-
-		// 在 Slice 里新增目标文件
-		newFiles := append(files, viewDir+"/articles/index.gohtml")
-
-		tmpl, err := template.ParseFiles(newFiles...)
-		logger.LogError(err)
-
-		err = tmpl.ExecuteTemplate(w,"app", articles)
-		logger.LogError(err)
+		view.Render(w, "articles.index", articles)
 	}
 }
 
