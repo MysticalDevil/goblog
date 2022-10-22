@@ -3,20 +3,13 @@ package route
 import (
 	"github.com/gorilla/mux"
 	"goblog/pkg/logger"
-	"goblog/routes"
 	"net/http"
 )
 
-var Router *mux.Router
-
-func Initialize() {
-	Router = mux.NewRouter()
-	routes.RegisterWebRoutes(Router)
-}
-
 // Name2URL 通过路由名称来获取 URL
 func Name2URL(routeName string, pairs ...string) string {
-	URL, err := Router.Get(routeName).URL(pairs...)
+	var router *mux.Router
+	URL, err := router.Get(routeName).URL(pairs...)
 	if err != nil {
 		logger.LogError(err)
 		return ""
