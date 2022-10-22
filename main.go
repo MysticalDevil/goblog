@@ -67,6 +67,7 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func notFountHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprint(w, "<h1>请求页面未找到</h1><p>如有疑问，请联系我。</p>")
 }
 
