@@ -51,9 +51,6 @@ func main() {
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 
-	// 中间件：强制内容类型为 HTML
-	router.Use(middlewares.ForceHTMLMiddleware)
-
 	err := http.ListenAndServe(":8080", middlewares.RemoveTrailingSlash(router))
 	logger.LogError(err)
 }
