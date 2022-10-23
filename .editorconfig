@@ -2,7 +2,7 @@
 
 root = true
 
-[*.gohtml]
+[{*.gohtml,*.html}]
 charset = utf-8
 trim_trailing_whitespace = true
 indent_style = space
