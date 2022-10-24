@@ -32,6 +32,11 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/do-login", auc.DoLogin).Methods("POST").Name("auth.doLogin")
 	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
+	r.HandleFunc("/auth/sendEmail", auc.SendEmail).Methods("GET").Name("auth.sendEmail")
+	r.HandleFunc("/auth/doSendEmail", auc.DoSendEmail).Methods("POST").Name("auth.doSendEmail")
+	r.HandleFunc("/auth/reset/{id:[0-9]+}", auc.ResetPassword).Methods("GET").Name("auth.reset")
+	r.HandleFunc("/auth/doReset", auc.DoResetPassword).Methods("POST").Name("auth.doReset")
+
 
 	// 静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))

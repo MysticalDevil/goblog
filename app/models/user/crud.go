@@ -37,3 +37,12 @@ func GetByEmail(email string) (User, error) {
 func (user *User) ComparePassword(_password string) bool {
 	return password.CheckHash(_password, user.Password)
 }
+
+func (user *User) Update() (rowsAffected int64, err error) {
+	result := model.DB.Save(&user)
+	if err = result.Error; err != nil {
+		logger.LogError(err)
+		return 0, nil
+	}
+	return result.RowsAffected, nil
+}
