@@ -31,7 +31,9 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/do-register", middlewares.Guest(auc.DoRegister)).Methods("POST").Name("auth.doRegister")
 	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/do-login", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.doLogin")
-	r.HandleFunc("/auth/logout", middlewares.Guest(auc.Logout)).Methods("POST").Name("auth.logout")
+
+	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
+
 	r.HandleFunc("/auth/sendEmail", middlewares.Guest(auc.SendEmail)).Methods("GET").Name("auth.sendEmail")
 	r.HandleFunc("/auth/doSendEmail", middlewares.Guest(auc.DoSendEmail)).Methods("POST").Name("auth.doSendEmail")
 	r.HandleFunc("/auth/reset/{id:[0-9]+}", middlewares.Guest(auc.ResetPassword)).Methods("GET").Name("auth.reset")
