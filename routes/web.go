@@ -32,12 +32,12 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/do-login", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.doLogin")
 
-	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
+	r.HandleFunc("/auth/logout", middlewares.Auth(auc.Logout)).Methods("POST").Name("auth.logout")
 
-	r.HandleFunc("/auth/sendEmail", middlewares.Guest(auc.SendEmail)).Methods("GET").Name("auth.sendEmail")
-	r.HandleFunc("/auth/doSendEmail", middlewares.Guest(auc.DoSendEmail)).Methods("POST").Name("auth.doSendEmail")
-	r.HandleFunc("/auth/reset/{id:[0-9]+}", middlewares.Guest(auc.ResetPassword)).Methods("GET").Name("auth.reset")
-	r.HandleFunc("/auth/doReset", middlewares.Guest(auc.DoResetPassword)).Methods("POST").Name("auth.doReset")
+	r.HandleFunc("/auth/sendEmail", middlewares.Auth(auc.SendEmail)).Methods("GET").Name("auth.sendEmail")
+	r.HandleFunc("/auth/doSendEmail", middlewares.Auth(auc.DoSendEmail)).Methods("POST").Name("auth.doSendEmail")
+	r.HandleFunc("/auth/reset/{id:[0-9]+}", middlewares.Auth(auc.ResetPassword)).Methods("GET").Name("auth.reset")
+	r.HandleFunc("/auth/doReset", middlewares.Auth(auc.DoResetPassword)).Methods("POST").Name("auth.doReset")
 
 	// 用户相关
 	uc := new(controllers.UserController)
