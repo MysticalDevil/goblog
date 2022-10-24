@@ -37,6 +37,9 @@ func RegisterWebRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/reset/{id:[0-9]+}", middlewares.Guest(auc.ResetPassword)).Methods("GET").Name("auth.reset")
 	r.HandleFunc("/auth/doReset", middlewares.Guest(auc.DoResetPassword)).Methods("POST").Name("auth.doReset")
 
+	// 用户相关
+	uc := new(controllers.UserController)
+	r.HandleFunc("/user/{id:[0-9]+}", uc.Show).Methods("GET").Name("users.show")
 
 	// 静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
