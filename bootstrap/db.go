@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"goblog/app/models/article"
 	"goblog/app/models/user"
+	"goblog/pkg/config"
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
 	"gorm.io/gorm"
@@ -16,9 +17,9 @@ func SetupDB() {
 	// 命令行打印数据库请求信息
 	sqlDB, _ := db.DB()
 
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetMaxIdleConns(25)
-	sqlDB.SetConnMaxLifetime(time.Minute * 5)
+	sqlDB.SetMaxOpenConns(config.GetInt("database.postgresql.max_open_connections"))
+	sqlDB.SetMaxIdleConns(config.GetInt("database.postgresql.max_idle_connections"))
+	sqlDB.SetConnMaxLifetime(time.Duration(config.GetInt("database.postgresql.max_life_seconds"))*time.Second)
 
 	migration(db)
 }
