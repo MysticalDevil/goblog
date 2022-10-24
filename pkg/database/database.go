@@ -2,7 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"goblog/pkg/logger"
 	"time"
 )
@@ -11,22 +11,14 @@ var DB *sql.DB
 
 func Initialize() {
 	initDB()
-	createTables()
 }
 
 func initDB() {
 	var err error
-	config := mysql.Config{
-		User:                 "root",
-		Passwd:               "112233",
-		Addr:                 "127.0.0.1:3308",
-		Net:                  "tcp",
-		DBName:               "goblog",
-		AllowNativePasswords: true,
-	}
+	connStr := "host=localhost user=postgres password=112233 dbname=goblog port=5432 sslmode=disable TimeZone=Asia/Shanghai"
 
 	// 准备数据库连接池
-	DB, err = sql.Open("mysql", config.FormatDSN())
+	DB, err = sql.Open("postgres", connStr)
 	logger.LogError(err)
 
 	// 设置最大连接数
@@ -38,16 +30,5 @@ func initDB() {
 
 	// 尝试连接
 	err = DB.Ping()
-	logger.LogError(err)
-}
-
-func createTables() {
-	createArticlesSQL := `CREATE TABLE IF NOT EXISTS articles(
-    id BIGINT(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
-    title VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-    body LONGTEXT COLLATE utf8mb4_unicode_ci
-    );`
-
-	_, err := DB.Exec(createArticlesSQL)
 	logger.LogError(err)
 }
