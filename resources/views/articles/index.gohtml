@@ -11,9 +11,7 @@
                   {{$article.Title}}
               </a>
             </h3>
-            <p class="blog-post-meta text-secondary">
-              发布于 <a href="" class="font-weight-bold">2022-10-22</a> by <a href="" class="font-weight-bold">DEvil</a>
-            </p>
+            {{template "article-meta" $article}}
             <hr>
               {{$article.Body}}
           </div>

@@ -11,3 +11,7 @@ type User struct {
 	// gorm:"-" -- 设置 Gorm 在读写时略过此字段
 	PasswordConfirm string `gorm:"-" valid:"password_confirm"`
 }
+
+func (user *User) Link() string {
+	return ""
+}
