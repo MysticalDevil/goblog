@@ -17,10 +17,10 @@ type Article struct {
 	User user.User
 }
 
-func (article *Article) Link() string {
+func (article Article) Link() string {
 	return route.Name2URL("articles.show", "id", strconv.FormatUint(article.ID, 10))
 }
 
-func (article *Article) CreatedAtDate() string {
+func (article Article) CreatedAtDate() string {
 	return article.CreatedAt.Format("2006-01-02")
 }

@@ -15,6 +15,6 @@ type User struct {
 	PasswordConfirm string `gorm:"-" valid:"password_confirm"`
 }
 
-func (user *User) Link() string {
+func (user User) Link() string {
 	return route.Name2URL("users.show", "id", user.GetStringID())
 }

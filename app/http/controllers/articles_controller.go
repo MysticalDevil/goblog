@@ -3,13 +3,15 @@ package controllers
 import (
 	"fmt"
 	"goblog/app/models/article"
+	"goblog/app/policies"
 	"goblog/app/requests"
+	"goblog/pkg/auth"
+	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/view"
 	"gorm.io/gorm"
 	"net/http"
-	"unicode/utf8"
 )
 
 
@@ -35,6 +37,7 @@ func (*ArticlesController) Show(w http.ResponseWriter, r *http.Request) {
 	} else {
 		view.Render(w,  view.D{
 			"Article": _article,
+			"CanModifyArticle": policies.CanModifyArticle(_article),
 		}, "articles.show", "articles._article_meta")
 	}
 }
@@ -61,6 +64,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	_article := article.Article{
 		Title: r.PostFormValue("title"),
 		Body : r.PostFormValue("body"),
+		UserID: auth.User().ID,
 	}
 
 	errors := requests.ValidateArticleForm(_article)
@@ -84,7 +88,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
+func (ac *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 	id := route.GetRouteVariable("id", r)
 
 	_article, err := article.Get(id)
@@ -99,10 +103,15 @@ func (*ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器颞部错误")
 		}
 	} else {
-		view.Render(w, view.D{
-			"Article": _article,
-			"Errors": view.D{},
-		}, "articles.edit", "articles._form_field")
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
+		} else {
+			view.Render(w, view.D{
+				"Article": _article,
+				"Errors": view.D{},
+			}, "articles.edit", "articles._form_field")
+		}
 	}
 }
 
@@ -121,32 +130,37 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "500 服务器内部错误")
 		}
 	} else {
-		_article.Title = r.PostFormValue("title")
-		_article.Body = r.PostFormValue("body")
-
-		errors := requests.ValidateArticleForm(_article)
-
-		if len(errors) == 0 {
-			rowsAffected, err := _article.Update()
-
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, "500 服务器内部错误")
-				return
-			}
-
-			if rowsAffected > 0 {
-				showURL := route.Name2URL("articles.show", "id", id)
-
-				http.Redirect(w, r, showURL, http.StatusFound)
-			} else {
-				fmt.Fprint(w, "您没有做任何更改！")
-			}
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
-			view.Render(w, view.D{
-				"Article": _article,
-				"Errors":  errors,
-			}, "articles.edit", "articles._form_field")
+			_article.Title = r.PostFormValue("title")
+			_article.Body = r.PostFormValue("body")
+
+			errors := requests.ValidateArticleForm(_article)
+
+			if len(errors) == 0 {
+				rowsAffected, err := _article.Update()
+
+				if err != nil {
+					w.WriteHeader(http.StatusInternalServerError)
+					fmt.Fprint(w, "500 服务器内部错误")
+					return
+				}
+
+				if rowsAffected > 0 {
+					showURL := route.Name2URL("articles.show", "id", id)
+
+					http.Redirect(w, r, showURL, http.StatusFound)
+				} else {
+					fmt.Fprint(w, "您没有做任何更改！")
+				}
+			} else {
+				view.Render(w, view.D{
+					"Article": _article,
+					"Errors":  errors,
+				}, "articles.edit", "articles._form_field")
+			}
 		}
 	}
 }
@@ -166,38 +180,25 @@ func (*ArticlesController) Delete(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "服务器内部错误")
 		}
 	} else {
-		rowsAffected, err := _article.Delete()
-
-		if err != nil {
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "服务其内部错误")
+		if !policies.CanModifyArticle(_article) {
+			flash.Warning("未授权操作！")
+			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
-			if rowsAffected > 0 {
-				indexURL := route.Name2URL("articles.index")
-				http.Redirect(w, r, indexURL, http.StatusFound)
+			rowsAffected, err := _article.Delete()
+
+			if err != nil {
+				logger.LogError(err)
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprint(w, "服务其内部错误")
 			} else {
-				w.WriteHeader(http.StatusNotFound)
-				fmt.Fprint(w, "404 文章未找到")
+				if rowsAffected > 0 {
+					indexURL := route.Name2URL("articles.index")
+					http.Redirect(w, r, indexURL, http.StatusFound)
+				} else {
+					w.WriteHeader(http.StatusNotFound)
+					fmt.Fprint(w, "404 文章未找到")
+				}
 			}
 		}
 	}
-}
-
-func validateArticleFormData(title, body string) map[string]string {
-	errors := make(map[string]string)
-
-	if title == "" {
-		errors["title"] = "标题不能为空"
-	} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
-		errors["title"] = "标题长度需介于 3-40 个字节"
-	}
-
-	if body == "" {
-		errors["body"] = "内容不能为空"
-	} else if utf8.RuneCountInString(body) < 10 {
-		errors["body"] = "内容长度需大于或等于 10 个字节"
-	}
-
-	return errors
 }
