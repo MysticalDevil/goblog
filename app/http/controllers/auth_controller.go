@@ -21,7 +21,7 @@ type AuthController struct {
 }
 
 // Register 注册页面
-func (*AuthController) Register(w http.ResponseWriter, r *http.Request) {
+func (*AuthController) Register(w http.ResponseWriter, _ *http.Request) {
 	view.RenderSimple(w, view.D{}, "auth.register")
 }
 
@@ -42,7 +42,10 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 			"User":   _user,
 		}, "auth.register")
 	} else {
-		_user.Create()
+		err := _user.Create()
+		if err != nil {
+			logger.LogError(err)
+		}
 
 		if _user.ID > 0 {
 			flash.Success("恭喜您注册成功！")
@@ -56,7 +59,7 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login 登录页面
-func (*AuthController) Login(w http.ResponseWriter, r *http.Request) {
+func (*AuthController) Login(w http.ResponseWriter, _ *http.Request) {
 	view.RenderSimple(w, view.D{}, "auth.login")
 }
 
@@ -85,7 +88,7 @@ func (*AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // SendEmail 发送邮件表单
-func (*AuthController) SendEmail(w http.ResponseWriter, r *http.Request) {
+func (*AuthController) SendEmail(w http.ResponseWriter, _ *http.Request) {
 	view.RenderSimple(w, view.D{}, "auth.sendEmail")
 }
 

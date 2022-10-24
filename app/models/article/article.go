@@ -9,8 +9,8 @@ import (
 type Article struct {
 	models.BaseModel
 
-	Title string
-	Body  string
+	Title string  `gorm:"varchar(255);not null;" valid:"title"`
+	Body  string  `gorm:"text;not null;" valid:"body"`
 }
 
 func (article *Article) Link() string {
