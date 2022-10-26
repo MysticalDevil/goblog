@@ -19,6 +19,9 @@ var router *mux.Router
 //go:embed resources/views/layouts/*
 var tplFS embed.FS
 
+//go:embed public/*
+var staticFS embed.FS
+
 func init() {
 	config.Initialize()
 }
@@ -28,7 +31,7 @@ func main() {
 
 	bootstrap.SetupTemplate(tplFS)
 
-	router = bootstrap.SetupRoute()
+	router = bootstrap.SetupRoute(staticFS)
 
 	err := http.ListenAndServe(":8080", middlewares.RemoveTrailingSlash(router))
 	logger.LogError(err)
