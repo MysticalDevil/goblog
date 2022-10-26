@@ -1,13 +1,14 @@
 package view
 
 import (
+	"embed"
 	"goblog/app/models/category"
 	"goblog/app/models/user"
 	"goblog/pkg/auth"
 	"goblog/pkg/flash"
 	"html/template"
 	"io"
-	"path/filepath"
+	"io/fs"
 	"strings"
 
 	"goblog/pkg/logger"
@@ -16,6 +17,8 @@ import (
 
 // D 是 map[string]interface{} 的简写
 type D map[string]any
+
+var TplFS embed.FS
 
 // Render 渲染通用视图
 func Render(w io.Writer, data D, tplFiles ...string) {
@@ -40,7 +43,7 @@ func RenderTemplate(w io.Writer, name string, data D, tplFiles ...string) {
 	tmpl, err := template.New("").
 		Funcs(template.FuncMap{
 			"RouteName2URL": route.Name2URL,
-		}).ParseFiles(allFiles...)
+		}).ParseFS(TplFS, allFiles...)
 	logger.LogError(err)
 
 	err = tmpl.ExecuteTemplate(w, name, data)
@@ -54,7 +57,7 @@ func getTemplateFiles(tplFiles ...string) []string {
 		tplFiles[i] = viewDir + strings.Replace(f, ".", "/", -1) + ".gohtml"
 	}
 
-	layoutFiles, err := filepath.Glob(viewDir + "layouts/*.gohtml")
+	layoutFiles, err := fs.Glob(TplFS, viewDir + "layouts/*.gohtml")
 	logger.LogError(err)
 
 	return append(layoutFiles, tplFiles...)

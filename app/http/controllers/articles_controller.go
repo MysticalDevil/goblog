@@ -3,11 +3,13 @@ package controllers
 import (
 	"fmt"
 	"goblog/app/models/article"
+	"goblog/app/models/category"
 	"goblog/app/policies"
 	"goblog/app/requests"
 	"goblog/pkg/auth"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
+	"goblog/pkg/types"
 	"goblog/pkg/view"
 	"net/http"
 )
@@ -57,6 +59,7 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request) {
 		Title: r.PostFormValue("title"),
 		Body : r.PostFormValue("body"),
 		UserID: auth.User().ID,
+		CategoryID: types.StringToUint64(r.PostFormValue("category_id")),
 	}
 
 	errors := requests.ValidateArticleForm(_article)
@@ -101,7 +104,12 @@ func (ac *ArticlesController) Edit(w http.ResponseWriter, r *http.Request) {
 
 func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 	id := route.GetRouteVariable("id", r)
+	cid := r.PostFormValue("category_id")
 
+	_category, err := category.Get(cid)
+	if err != nil {
+		ac.ResponseForSQLError(w, err)
+	}
 	_article, err := article.Get(id)
 
 	if err != nil {
@@ -112,6 +120,7 @@ func (ac *ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		} else {
 			_article.Title = r.PostFormValue("title")
 			_article.Body = r.PostFormValue("body")
+			_article.Category = _category
 
 			errors := requests.ValidateArticleForm(_article)
 
